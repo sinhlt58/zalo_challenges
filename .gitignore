@@ -1,0 +1,6 @@
+models
+.ipynb_checkpoints
+.vscode
+__pycache__
+qna_data/**/*.json
+qna_data/**/*.csv

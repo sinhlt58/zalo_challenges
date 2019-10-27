@@ -2,5 +2,11 @@ models
 .ipynb_checkpoints
 .vscode
 __pycache__
-qna_data/**/*.json
-qna_data/**/*.csv
+qna_data
+bert_official
+bidaf-keras
+glue_data
+models
+reports
+runs
+transformers-repo

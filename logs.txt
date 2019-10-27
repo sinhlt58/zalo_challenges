@@ -1,0 +1,344 @@
+
+(base) C:\Users\sinhl>conda activate zalo_challenges
+
+(zalo_challenges) C:\Users\sinhl>d:
+
+(zalo_challenges) D:\>cd works\zalo_challenges
+
+(zalo_challenges) D:\works\zalo_challenges>python train.py train_full
+2019-10-23 20:47:04.490736: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library cudart64_100.dll
+Traceback (most recent call last):
+  File "train.py", line 343, in <module>
+    current_epoch=3,
+  File "train.py", line 31, in __init__
+    self.current_epoch
+AttributeError: 'Trainer' object has no attribute 'current_epoch'
+
+(zalo_challenges) D:\works\zalo_challenges>python train.py train_full
+2019-10-23 20:47:59.588954: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library cudart64_100.dll
+2019-10-23 20:48:03.336113: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library nvcuda.dll
+2019-10-23 20:48:04.347018: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties:
+name: GeForce GTX 1060 major: 6 minor: 1 memoryClockRate(GHz): 1.733
+pciBusID: 0000:01:00.0
+2019-10-23 20:48:04.389486: I tensorflow/stream_executor/platform/default/dlopen_checker_stub.cc:25] GPU libraries are statically linked, skip dlopen check.
+2019-10-23 20:48:04.408696: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2019-10-23 20:48:04.436803: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2
+2019-10-23 20:48:04.455965: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties:
+name: GeForce GTX 1060 major: 6 minor: 1 memoryClockRate(GHz): 1.733
+pciBusID: 0000:01:00.0
+2019-10-23 20:48:04.473414: I tensorflow/stream_executor/platform/default/dlopen_checker_stub.cc:25] GPU libraries are statically linked, skip dlopen check.
+2019-10-23 20:48:04.480626: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2019-10-23 20:48:17.480221: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1159] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-10-23 20:48:17.494293: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1165]      0
+2019-10-23 20:48:17.502942: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1178] 0:   N
+2019-10-23 20:48:17.564587: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1304] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4708 MB memory) -> physical GPU (device: 0, name: GeForce GTX 1060, pci bus id: 0000:01:00.0, compute capability: 6.1)
+Loading saved_epoch_path: models/en_bert_bidaf_en_normal_uncasedl/2/2
+train_size:  16297
+dev_size:  1811
+batch_size:  32
+_train steps_per_epoch:  510
+2019-10-23 20:49:07.449785: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library cublas64_100.dll
+2019-10-23 20:49:16.603387: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library cudnn64_7.dll
+Epoch 3 batch 0/510 with loss 0.31984466314315796
+Epoch 3 batch 10/510 with loss 0.4106982946395874
+Epoch 3 batch 20/510 with loss 0.24471637606620789
+Epoch 3 batch 30/510 with loss 0.47115543484687805
+Epoch 3 batch 40/510 with loss 0.4522380828857422
+Epoch 3 batch 50/510 with loss 0.2583400309085846
+Epoch 3 batch 60/510 with loss 0.3476172983646393
+Epoch 3 batch 70/510 with loss 0.3928235173225403
+Epoch 3 batch 80/510 with loss 0.20142598450183868
+Epoch 3 batch 90/510 with loss 0.2972337007522583
+Epoch 3 batch 100/510 with loss 0.2523452043533325
+Epoch 3 batch 110/510 with loss 0.5042270421981812
+Epoch 3 batch 120/510 with loss 0.30824801325798035
+Epoch 3 batch 130/510 with loss 0.38048186898231506
+Epoch 3 batch 140/510 with loss 0.30940818786621094
+Epoch 3 batch 150/510 with loss 0.24601642787456512
+Epoch 3 batch 160/510 with loss 0.2616490125656128
+Epoch 3 batch 170/510 with loss 0.2770952582359314
+Epoch 3 batch 180/510 with loss 0.3861747086048126
+Epoch 3 batch 190/510 with loss 0.28740179538726807
+Epoch 3 batch 200/510 with loss 0.32664382457733154
+Epoch 3 batch 210/510 with loss 0.1984708607196808
+Epoch 3 batch 220/510 with loss 0.3640909790992737
+Epoch 3 batch 230/510 with loss 0.36937713623046875
+Epoch 3 batch 240/510 with loss 0.503520131111145
+Epoch 3 batch 250/510 with loss 0.3555024266242981
+Epoch 3 batch 260/510 with loss 0.26155275106430054
+Epoch 3 batch 270/510 with loss 0.5304056406021118
+Epoch 3 batch 280/510 with loss 0.2337469756603241
+Epoch 3 batch 290/510 with loss 0.4730927050113678
+Epoch 3 batch 300/510 with loss 0.2553473711013794
+Epoch 3 batch 310/510 with loss 0.32559359073638916
+Epoch 3 batch 320/510 with loss 0.4347016215324402
+Epoch 3 batch 330/510 with loss 0.31509682536125183
+Epoch 3 batch 340/510 with loss 0.46496206521987915
+Epoch 3 batch 350/510 with loss 0.20047210156917572
+Epoch 3 batch 360/510 with loss 0.3161117434501648
+Epoch 3 batch 370/510 with loss 0.40536534786224365
+Epoch 3 batch 380/510 with loss 0.3105027675628662
+Epoch 3 batch 390/510 with loss 0.4673936367034912
+Epoch 3 batch 400/510 with loss 0.2523531913757324
+Epoch 3 batch 410/510 with loss 0.39477184414863586
+Epoch 3 batch 420/510 with loss 0.3256574869155884
+Epoch 3 batch 430/510 with loss 0.24564406275749207
+Epoch 3 batch 440/510 with loss 0.3616378903388977
+Epoch 3 batch 450/510 with loss 0.5210556983947754
+Epoch 3 batch 460/510 with loss 0.38908958435058594
+Epoch 3 batch 470/510 with loss 0.2595837712287903
+Epoch 3 batch 480/510 with loss 0.28450310230255127
+Epoch 3 batch 490/510 with loss 0.3566149175167084
+Epoch 3 batch 500/510 with loss 0.3449738025665283
+_score_dataset steps_per_epoch:  57
+_score_dataset steps_per_epoch:  57
+Epoch 4 Loss 0.3539. Train accuracy 0.8635 f1 0.7575.Dev accuracy 0.8741 f1 0.7715. Time taken for 1 epoch 4861.8570 sec
+
+Saved model to path:  models/en_bert_bidaf_en_normal_uncasedl/3/3
+Epoch 4 batch 0/510 with loss 0.21008312702178955
+Epoch 4 batch 10/510 with loss 0.323337197303772
+Epoch 4 batch 20/510 with loss 0.32772207260131836
+Epoch 4 batch 30/510 with loss 0.3174980878829956
+Epoch 4 batch 40/510 with loss 0.6093238592147827
+Epoch 4 batch 50/510 with loss 0.37762540578842163
+Epoch 4 batch 60/510 with loss 0.41377782821655273
+Epoch 4 batch 70/510 with loss 0.28242266178131104
+Epoch 4 batch 80/510 with loss 0.30162352323532104
+Epoch 4 batch 90/510 with loss 0.42006030678749084
+Epoch 4 batch 100/510 with loss 0.23122873902320862
+Epoch 4 batch 110/510 with loss 0.24479785561561584
+Epoch 4 batch 120/510 with loss 0.3406960964202881
+Epoch 4 batch 130/510 with loss 0.33143341541290283
+Epoch 4 batch 140/510 with loss 0.3734731078147888
+Epoch 4 batch 150/510 with loss 0.2837318778038025
+Epoch 4 batch 160/510 with loss 0.24471527338027954
+Epoch 4 batch 170/510 with loss 0.1526925414800644
+Epoch 4 batch 180/510 with loss 0.44516539573669434
+Epoch 4 batch 190/510 with loss 0.46420812606811523
+Epoch 4 batch 200/510 with loss 0.26956748962402344
+Epoch 4 batch 210/510 with loss 0.1999012529850006
+Epoch 4 batch 220/510 with loss 0.3656218647956848
+Epoch 4 batch 230/510 with loss 0.2756221294403076
+Epoch 4 batch 240/510 with loss 0.2748916745185852
+Epoch 4 batch 250/510 with loss 0.2868947386741638
+Epoch 4 batch 260/510 with loss 0.4697658121585846
+Epoch 4 batch 270/510 with loss 0.3053354024887085
+Epoch 4 batch 280/510 with loss 0.49732550978660583
+Epoch 4 batch 290/510 with loss 0.41841936111450195
+Epoch 4 batch 300/510 with loss 0.2891866862773895
+Epoch 4 batch 310/510 with loss 0.26909440755844116
+Epoch 4 batch 320/510 with loss 0.3872976005077362
+Epoch 4 batch 330/510 with loss 0.2807856798171997
+Epoch 4 batch 340/510 with loss 0.4020267128944397
+Epoch 4 batch 350/510 with loss 0.4335971474647522
+Epoch 4 batch 360/510 with loss 0.47512170672416687
+Epoch 4 batch 370/510 with loss 0.3637751340866089
+Epoch 4 batch 380/510 with loss 0.48022404313087463
+Epoch 4 batch 390/510 with loss 0.2390073537826538
+Epoch 4 batch 400/510 with loss 0.3152068257331848
+Epoch 4 batch 410/510 with loss 0.30342233180999756
+Epoch 4 batch 420/510 with loss 0.3039410412311554
+Epoch 4 batch 430/510 with loss 0.27774181962013245
+Epoch 4 batch 440/510 with loss 0.43587639927864075
+Epoch 4 batch 450/510 with loss 0.23794642090797424
+Epoch 4 batch 460/510 with loss 0.30668243765830994
+Epoch 4 batch 470/510 with loss 0.24504083395004272
+Epoch 4 batch 480/510 with loss 0.2919577956199646
+Epoch 4 batch 490/510 with loss 0.35955843329429626
+Epoch 4 batch 500/510 with loss 0.36152249574661255
+_score_dataset steps_per_epoch:  57
+_score_dataset steps_per_epoch:  57
+Epoch 5 Loss 0.3155. Train accuracy 0.8816 f1 0.8075.Dev accuracy 0.8791 f1 0.7996. Time taken for 1 epoch 4758.2666 sec
+
+Saved model to path:  models/en_bert_bidaf_en_normal_uncasedl/4/4
+Epoch 5 batch 0/510 with loss 0.20485930144786835
+Epoch 5 batch 10/510 with loss 0.30756792426109314
+Epoch 5 batch 20/510 with loss 0.3048597276210785
+Epoch 5 batch 30/510 with loss 0.4381803572177887
+Epoch 5 batch 40/510 with loss 0.3849491477012634
+Epoch 5 batch 50/510 with loss 0.18370938301086426
+Epoch 5 batch 60/510 with loss 0.2239587903022766
+Epoch 5 batch 70/510 with loss 0.2369910180568695
+Epoch 5 batch 80/510 with loss 0.13205170631408691
+Epoch 5 batch 90/510 with loss 0.3570820093154907
+Epoch 5 batch 100/510 with loss 0.23244956135749817
+Epoch 5 batch 110/510 with loss 0.25760242342948914
+Epoch 5 batch 120/510 with loss 0.29678964614868164
+Epoch 5 batch 130/510 with loss 0.3938024938106537
+Epoch 5 batch 140/510 with loss 0.3156099319458008
+Epoch 5 batch 150/510 with loss 0.272927463054657
+Epoch 5 batch 160/510 with loss 0.17417123913764954
+Epoch 5 batch 170/510 with loss 0.36349329352378845
+Epoch 5 batch 180/510 with loss 0.1833629608154297
+Epoch 5 batch 190/510 with loss 0.5208889245986938
+Epoch 5 batch 200/510 with loss 0.2984806299209595
+Epoch 5 batch 210/510 with loss 0.1858764886856079
+Epoch 5 batch 220/510 with loss 0.2139945775270462
+Epoch 5 batch 230/510 with loss 0.36218589544296265
+Epoch 5 batch 240/510 with loss 0.2537482976913452
+Epoch 5 batch 250/510 with loss 0.2605496048927307
+Epoch 5 batch 260/510 with loss 0.3309282958507538
+Epoch 5 batch 270/510 with loss 0.41225627064704895
+Epoch 5 batch 280/510 with loss 0.30557721853256226
+Epoch 5 batch 290/510 with loss 0.26909831166267395
+Epoch 5 batch 300/510 with loss 0.3099220395088196
+Epoch 5 batch 310/510 with loss 0.08163928985595703
+Epoch 5 batch 320/510 with loss 0.3722628355026245
+Epoch 5 batch 330/510 with loss 0.28664329648017883
+Epoch 5 batch 340/510 with loss 0.2664863169193268
+Epoch 5 batch 350/510 with loss 0.10991563647985458
+Epoch 5 batch 360/510 with loss 0.3995782732963562
+Epoch 5 batch 370/510 with loss 0.38589751720428467
+Epoch 5 batch 380/510 with loss 0.29800504446029663
+Epoch 5 batch 390/510 with loss 0.28385835886001587
+Epoch 5 batch 400/510 with loss 0.29728448390960693
+Epoch 5 batch 410/510 with loss 0.35720518231391907
+Epoch 5 batch 420/510 with loss 0.2988625764846802
+Epoch 5 batch 430/510 with loss 0.11843425035476685
+Epoch 5 batch 440/510 with loss 0.33177441358566284
+Epoch 5 batch 450/510 with loss 0.4748378396034241
+Epoch 5 batch 460/510 with loss 0.36457905173301697
+Epoch 5 batch 470/510 with loss 0.34593456983566284
+Epoch 5 batch 480/510 with loss 0.13796460628509521
+Epoch 5 batch 490/510 with loss 0.24266470968723297
+Epoch 5 batch 500/510 with loss 0.2851661741733551
+_score_dataset steps_per_epoch:  57
+_score_dataset steps_per_epoch:  57
+Epoch 6 Loss 0.2883. Train accuracy 0.9024 f1 0.8352.Dev accuracy 0.9039 f1 0.8383. Time taken for 1 epoch 4686.1567 sec
+
+Saved model to path:  models/en_bert_bidaf_en_normal_uncasedl/5/5
+Epoch 6 batch 0/510 with loss 0.40907052159309387
+Epoch 6 batch 10/510 with loss 0.47915515303611755
+Epoch 6 batch 20/510 with loss 0.11983755230903625
+Epoch 6 batch 30/510 with loss 0.08626113831996918
+Epoch 6 batch 40/510 with loss 0.22848984599113464
+Epoch 6 batch 50/510 with loss 0.06940753012895584
+Epoch 6 batch 60/510 with loss 0.5536991357803345
+Epoch 6 batch 70/510 with loss 0.2968917787075043
+Epoch 6 batch 80/510 with loss 0.22714640200138092
+Epoch 6 batch 90/510 with loss 0.12913474440574646
+Epoch 6 batch 100/510 with loss 0.47641804814338684
+Epoch 6 batch 110/510 with loss 0.1721796691417694
+Epoch 6 batch 120/510 with loss 0.24968785047531128
+Epoch 6 batch 130/510 with loss 0.18938858807086945
+Epoch 6 batch 140/510 with loss 0.2741345465183258
+Epoch 6 batch 150/510 with loss 0.0901205912232399
+Epoch 6 batch 160/510 with loss 0.2655578851699829
+Epoch 6 batch 170/510 with loss 0.3873681426048279
+Epoch 6 batch 180/510 with loss 0.28796544671058655
+Epoch 6 batch 190/510 with loss 0.33453845977783203
+Epoch 6 batch 200/510 with loss 0.22081950306892395
+Epoch 6 batch 210/510 with loss 0.10787665843963623
+Epoch 6 batch 220/510 with loss 0.18617618083953857
+Epoch 6 batch 230/510 with loss 0.30768290162086487
+Epoch 6 batch 240/510 with loss 0.13887916505336761
+Epoch 6 batch 250/510 with loss 0.3842930793762207
+Epoch 6 batch 260/510 with loss 0.26764369010925293
+Epoch 6 batch 270/510 with loss 0.3476388454437256
+Epoch 6 batch 280/510 with loss 0.3480675220489502
+Epoch 6 batch 290/510 with loss 0.2342710793018341
+Epoch 6 batch 300/510 with loss 0.3175264596939087
+Epoch 6 batch 310/510 with loss 0.3030049204826355
+Epoch 6 batch 320/510 with loss 0.3649928867816925
+Epoch 6 batch 330/510 with loss 0.24491257965564728
+Epoch 6 batch 340/510 with loss 0.2164117991924286
+Epoch 6 batch 350/510 with loss 0.3717411756515503
+Epoch 6 batch 360/510 with loss 0.31829899549484253
+Epoch 6 batch 370/510 with loss 0.09538698196411133
+Epoch 6 batch 380/510 with loss 0.1611056625843048
+Epoch 6 batch 390/510 with loss 0.19478532671928406
+Epoch 6 batch 400/510 with loss 0.2849869430065155
+Epoch 6 batch 410/510 with loss 0.18885965645313263
+Epoch 6 batch 420/510 with loss 0.24585458636283875
+Epoch 6 batch 430/510 with loss 0.12213724106550217
+Epoch 6 batch 440/510 with loss 0.2615164518356323
+Epoch 6 batch 450/510 with loss 0.24406246840953827
+Epoch 6 batch 460/510 with loss 0.1701807677745819
+Epoch 6 batch 470/510 with loss 0.24271593987941742
+Epoch 6 batch 480/510 with loss 0.2426811307668686
+Epoch 6 batch 490/510 with loss 0.31586599349975586
+Epoch 6 batch 500/510 with loss 0.5631871819496155
+_score_dataset steps_per_epoch:  57
+_score_dataset steps_per_epoch:  57
+Epoch 7 Loss 0.2549. Train accuracy 0.8997 f1 0.8201.Dev accuracy 0.8923 f1 0.8064. Time taken for 1 epoch 4682.4603 sec
+
+Saved model to path:  models/en_bert_bidaf_en_normal_uncasedl/6/6
+Epoch 7 batch 0/510 with loss 0.16482488811016083
+Epoch 7 batch 10/510 with loss 0.3021364212036133
+Epoch 7 batch 20/510 with loss 0.20254531502723694
+Epoch 7 batch 30/510 with loss 0.16187737882137299
+Epoch 7 batch 40/510 with loss 0.19421258568763733
+Epoch 7 batch 50/510 with loss 0.07682596892118454
+Epoch 7 batch 60/510 with loss 0.1180269867181778
+Epoch 7 batch 70/510 with loss 0.2228059321641922
+Epoch 7 batch 80/510 with loss 0.20360662043094635
+Epoch 7 batch 90/510 with loss 0.13327819108963013
+Epoch 7 batch 100/510 with loss 0.2905702590942383
+Epoch 7 batch 110/510 with loss 0.37519583106040955
+Epoch 7 batch 120/510 with loss 0.36362066864967346
+Epoch 7 batch 130/510 with loss 0.22210434079170227
+Epoch 7 batch 140/510 with loss 0.3031538426876068
+Epoch 7 batch 150/510 with loss 0.1887182742357254
+Epoch 7 batch 160/510 with loss 0.3267521262168884
+Epoch 7 batch 170/510 with loss 0.4153362512588501
+Epoch 7 batch 180/510 with loss 0.13941216468811035
+Epoch 7 batch 190/510 with loss 0.1919025182723999
+Epoch 7 batch 200/510 with loss 0.11756973713636398
+Epoch 7 batch 210/510 with loss 0.16463355720043182
+Epoch 7 batch 220/510 with loss 0.12179131805896759
+Epoch 7 batch 230/510 with loss 0.2894229292869568
+Epoch 7 batch 240/510 with loss 0.30655521154403687
+Epoch 7 batch 250/510 with loss 0.18378910422325134
+Epoch 7 batch 260/510 with loss 0.0846211314201355
+Epoch 7 batch 270/510 with loss 0.22574296593666077
+Epoch 7 batch 280/510 with loss 0.18599990010261536
+Epoch 7 batch 290/510 with loss 0.1954076886177063
+Epoch 7 batch 300/510 with loss 0.10952756553888321
+Epoch 7 batch 310/510 with loss 0.30925366282463074
+Epoch 7 batch 320/510 with loss 0.3777131736278534
+Epoch 7 batch 330/510 with loss 0.21906082332134247
+Epoch 7 batch 340/510 with loss 0.3065165877342224
+Epoch 7 batch 350/510 with loss 0.19725903868675232
+Epoch 7 batch 360/510 with loss 0.15185490250587463
+Epoch 7 batch 370/510 with loss 0.2400394082069397
+Epoch 7 batch 380/510 with loss 0.18710361421108246
+Epoch 7 batch 390/510 with loss 0.13578425347805023
+Epoch 7 batch 400/510 with loss 0.13429881632328033
+Epoch 7 batch 410/510 with loss 0.24699367582798004
+Epoch 7 batch 420/510 with loss 0.15142516791820526
+Epoch 7 batch 430/510 with loss 0.3543654680252075
+Epoch 7 batch 440/510 with loss 0.6431256532669067
+Epoch 7 batch 450/510 with loss 0.19135305285453796
+Epoch 7 batch 460/510 with loss 0.17603212594985962
+Epoch 7 batch 470/510 with loss 0.19326555728912354
+Epoch 7 batch 480/510 with loss 0.15996649861335754
+Epoch 7 batch 490/510 with loss 0.15157407522201538
+Epoch 7 batch 500/510 with loss 0.297387957572937
+_score_dataset steps_per_epoch:  57
+_score_dataset steps_per_epoch:  57
+Epoch 8 Loss 0.2220. Train accuracy 0.9260 f1 0.8829.Dev accuracy 0.9161 f1 0.8618. Time taken for 1 epoch 4684.2657 sec
+
+Saved model to path:  models/en_bert_bidaf_en_normal_uncasedl/7/7
+
+(zalo_challenges) D:\works\zalo_challenges>python train.py train_full
+2019-10-24 06:20:19.744466: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library cudart64_100.dll
+ImportError: DLL load failed: The specified module could not be found.
+ImportError: numpy.core.multiarray failed to import
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen importlib._bootstrap>", line 968, in _find_and_load
+SystemError: <class '_frozen_importlib._ModuleLockManager'> returned a result with an error set
+ImportError: numpy.core._multiarray_umath failed to import
+ImportError: numpy.core.umath failed to import
+Traceback (most recent call last):
+  File "train.py", line 6, in <module>
+    import tensorflow as tf
+  File "D:\works\anaconda\envs\zalo_challenges\lib\site-packages\tensorflow\__init__.py", line 98, in <module>
+    from tensorflow_core import *
+  File "D:\works\anaconda\envs\zalo_challenges\lib\site-packages\tensorflow_core\__init__.py", line 40, in <module>
+    from tensorflow.python.tools import module_util as _module_util
+ModuleNotFoundError: No module named 'tensorflow.python.tools'; 'tensorflow.python' is not a package
+
+(zalo_challenges) D:\works\zalo_challenges>

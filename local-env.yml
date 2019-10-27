@@ -1,0 +1,10 @@
+name: zalo_challenges_tf
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - tensorflow
+  - bert-for-tf2
+  - pandas
+  - sklearn
+  - nltk

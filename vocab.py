@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class VocabEntry:
-    MAX_SENT_LEN = 250
+    MAX_SENT_LEN = 300
 
     def __init__(self, word2id=None, max_sent_len=0):
         if word2id:

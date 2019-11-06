@@ -1,7 +1,10 @@
 import io
 import os
-import json, pickle
+import json
+import pickle
+import csv
 
+import tensorflow as tf
 import numpy as np
 
 def write_json_data(path, data):
@@ -44,3 +47,28 @@ def convert_df_str(df):
 
     for col in str_df:
         df[col] = str_df[col]
+
+
+def _load_glue_dataset(file_path):
+    dict_data = {
+        "idx": [],
+        "label": [],
+        "question": [],
+        "sentence": [],
+    }
+    with open(file_path, "r", encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter="\t")
+
+        for idx, row in enumerate(reader):
+            dict_data["idx"].append(idx)
+            dict_data["label"].append(row[2])
+            dict_data["question"].append(row[0])
+            dict_data["sentence"].append(row[1])
+    tf_dataset = tf.data.Dataset.from_tensor_slices(dict_data)
+    return tf_dataset, len(dict_data["label"])
+
+def load_glue_data(folder_path, task="qnli"):
+    train_set, train_len = _load_glue_dataset("{}/{}/train.tsv".format(folder_path, task))
+    dev_set, dev_len = _load_glue_dataset("{}/{}/dev.tsv".format(folder_path, task))
+
+    return (train_set, train_len), (dev_set, dev_len)

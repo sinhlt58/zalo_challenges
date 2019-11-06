@@ -1,0 +1,5 @@
+torch
+torchvision
+tensorflow-gpu
+transformers
+-r trans_requirements.txt

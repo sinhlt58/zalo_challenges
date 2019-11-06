@@ -182,7 +182,7 @@ class ViPreProcessor:
 
 class EnPreProcessor:
 
-    def __init__(self, bert_type, for_train):
+    def __init__(self, bert_type, for_train, for_glue=False):
         bert_model_path, bert_vocab_file, do_lower_case\
             = get_bert_paths(bert_type)
         self.bert_tokenizer = FullTokenizer(
@@ -336,7 +336,7 @@ def preprocess_qna_data(config):
         for method in config["methods"]:
             for bert_type in config["bert_types"]:
                 processor = EnPreProcessor(
-                    bert_type, config["for_train"],
+                    bert_type, config["for_train"], config["for_glue"]
                 )
                 processor.preprocess_qna_data(
                     method,
@@ -356,6 +356,7 @@ if __name__ == "__main__":
             "local_test_split": 0.2,
             "build_vocab": True,
             "for_train": True, # Will build ready datasets for training
+            "for_glue": True,
         },
         # {
         #     "language": "en",

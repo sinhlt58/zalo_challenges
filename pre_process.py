@@ -23,6 +23,8 @@ class ViPreProcessor:
         self.question_size = 50
         self.text_size = 300
 
+        self.char_to_remove_in_question = b',"-\xe2\x80\x9c\xe2\x80\x9d()?\xe2\x80\x93/+\x08!:._\xc2\xad\'\xe2\x80\xb2\\\xe2\x80\x98\xe2\x80\x99'.decode('utf-8')
+
     def preprocess_qna_data(
         self, method, cased, dataset_types,
     ):
@@ -59,7 +61,7 @@ class ViPreProcessor:
                         method, cased, key
                     )
                     pre_text, tokens = self.pre_process_text(
-                        json_sample[key], method, cased, self.for_train
+                        json_sample[key], method, cased, self.for_train, key
                     )
                     json_sample[pre_key] = pre_text
 
@@ -123,37 +125,72 @@ class ViPreProcessor:
         self.vocab.save_json(vocab_file)
         print ("Save vocab to file {}".format(vocab_file))
 
-    def pre_process_text(self, text, method, cased, for_train):
-        # remove references in wikipedia articles (ex: [1])
-        text = re.sub(r'\[[0-9]+\]', "", text)
+    def pre_process_text(self, text, method, cased, for_train, key):
+        # # remove references in wikipedia articles (ex: [1])
+        # text = re.sub(r'\[[0-9]+\]', "", text)
 
-        # simple tokenize
-        tokens = word_tokenize(text)
-        text = " ".join(tokens)
+        # # simple tokenize
+        # tokens = word_tokenize(text)
+        # text = " ".join(tokens)
 
-        # remove punctuation
-        punctuations = string.punctuation
-        punctuations = re.sub(r'\(|\)|-', "", punctuations) # we keep ( )
-        text = text.translate(str.maketrans('', '', punctuations))
-        text = text.replace("()", "") # remove empty ()
-        text = text.replace("( )", "") # remove ( )
-        text = re.sub(r'\( .{1,2} \)', "", text) # remove stuff
-        text = text.replace("–", " ")
-        text = text.replace("-", " ")
+        # # remove punctuation
+        # punctuations = string.punctuation
+        # punctuations = re.sub(r'\(|\)|-', "", punctuations) # we keep ( )
+        # text = text.translate(str.maketrans('', '', punctuations))
+        # text = text.replace("()", "") # remove empty ()
+        # text = text.replace("( )", "") # remove ( )
+        # text = re.sub(r'\( .{1,2} \)', "", text) # remove stuff
+        # text = text.replace("–", " ")
+        # text = text.replace("-", " ")
 
-        # replace number, entities
-        text = re.sub(r'\b[0-9]+\b', "_NUMBER_", text)
+        # # replace number, entities
+        # text = re.sub(r'\b[0-9]+\b', "_NUMBER_", text)
 
-        # remove spaces
+        # # remove spaces
+        # tokens = text.split()
+        # text = " ".join(tokens)
+
+        # if cased == "uncased":
+        #     text = text.lower()
+
+        # tokens = text.split()
+
+        # return text, tokens
+
+        if key == "question":
+            return self._pre_process_question(text)
+        elif key == "text":
+            return self._pre_process_text(text)
+
+    def _pre_process_common(self, text):
         tokens = text.split()
         text = " ".join(tokens)
+        return text.strip()
 
-        if cased == "uncased":
-            text = text.lower()
+    def _pre_process_question(self, text):
+        text = self._pre_process_common(text)
 
-        tokens = text.split()
+        # 1. remove special characters in questions
+        r_text = ""
+        for c in text:
+            if c in self.char_to_remove_in_question:
+                r_text += ' ' # we replace them with ' '
+            else:
+                r_text += c
+        text = self._pre_process_common(r_text)
 
-        return text, tokens
+        # 2. Uppercase the first character
+        text = text[:1].capitalize() + text[1:]
+
+        # 3. We add ? to the end of the question (it is a kind of an information for BERT)
+        text += " ?"
+
+        return text, text.split()
+
+    def _pre_process_text(self, text):
+        text = self._pre_process_common(text)
+
+        return text, text.split()
 
     def write_features_columns(self, features_columns, folder_name, dataset_type):
         folder_path = "qna_data/pre_data/vi_{}".format(folder_name)
@@ -350,9 +387,9 @@ if __name__ == "__main__":
     configs = [
         {
             "language": "vi",
-            "dataset_types": ["train", "test"],
+            "dataset_types": ["train", "test", "private"],
             "methods": ["normal"],
-            "cases": ["cased", "uncased"],
+            "cases": ["cased"],
             "local_test_split": 0.2,
             "build_vocab": True,
             "for_train": True, # Will build ready datasets for training

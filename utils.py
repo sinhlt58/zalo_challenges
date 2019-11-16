@@ -3,6 +3,7 @@ import os
 import json
 import pickle
 import csv
+import re
 
 import tensorflow as tf
 import numpy as np
@@ -72,3 +73,53 @@ def load_glue_data(folder_path, task="qnli"):
     dev_set, dev_len = _load_glue_dataset("{}/{}/dev.tsv".format(folder_path, task))
 
     return (train_set, train_len), (dev_set, dev_len)
+
+
+def get_file_names_in_dir(dir_path):
+    from os import walk
+
+    f = []
+    for (dirpath, dirnames, filenames) in walk(dir_path):
+        f.extend(filenames)
+        names = []
+        for n in f:
+            if n.endswith(".txt"):
+                n = n.replace(".txt", "")
+                names.append(n)
+        return names
+
+def find_dict_data(value, dict_data, key="id"):
+    for sample in dict_data:
+        if sample[key] == value:
+            return sample
+    return None
+
+def process_split_text(text):
+    tokens = text.split()
+    text = " ".join(tokens)
+    return text.strip()
+
+def untokenize(words):
+    """
+    Untokenizing a text undoes the tokenizing operation, restoring
+    punctuation and spaces to the places that people expect them to be.
+    Ideally, `untokenize(tokenize(text))` should be identical to `text`,
+    except for line breaks.
+    """
+    text = ' '.join(words)
+    step1 = text.replace("`` ", '"').replace(" ''", '"').replace('. . .',  '...')
+    step2 = step1.replace(" ( ", " (").replace(" ) ", ") ")
+    step3 = re.sub(r' ([.,:;?!%]+)([ \'"`])', r"\1\2", step2)
+    step4 = re.sub(r' ([.,:;?!%]+)$', r"\1", step3)
+    step5 = step4.replace(" '", "'").replace(" n't", "n't").replace(
+         "can not", "cannot")
+    step6 = step5.replace(" ` ", " '")
+    return step6.strip()
+
+def _to_utf8(file_path, out_path):
+    json_dict = read_json_data(file_path)
+    write_json_data(out_path, json_dict)
+
+if __name__ == "__main__":
+    _to_utf8("./bert-vietnamese-question-answering/dataset/dev-v2.0.json", "squad_data/vi_g_dev-v2.0.json")
+    _to_utf8("./bert-vietnamese-question-answering/dataset/train-v2.0.json", "squad_data/vi_g_train-v2.0.json")

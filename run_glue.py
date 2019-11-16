@@ -22,6 +22,10 @@ import glob
 import logging
 import os
 import random
+# sinh.luutruong added
+import scipy
+import pandas as pd
+# sinh.luutruong end
 
 import numpy as np
 import torch
@@ -278,20 +282,20 @@ def evaluate(args, model, tokenizer, prefix="", eval_test=False): # sinh.luutruo
         eval_loss = eval_loss / nb_eval_steps
         if args.output_mode == "classification":
             # sinh.luutruong start
-            if eval_test:
-                results.update({
-                    "probs": preds
-                })
+            results.update({
+                "logits": preds,
+                "probs": scipy.special.softmax(preds, axis=1),
+            })
             # sinh.luutruong end
             preds = np.argmax(preds, axis=1)
         elif args.output_mode == "regression":
             preds = np.squeeze(preds)
         result = compute_metrics("mrpc", preds, out_label_ids) # sinh.luutruong changed eval_task to mrpc to get f1 score
         # sinh.luutruong start
-        if eval_test:
-            results.update({
-                "preds": preds
-            })
+        results.update({
+            "preds": preds,
+            "true_labels": out_label_ids,
+        })
         # sinh.luutruong end
         results.update(result)
 
@@ -375,7 +379,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, eval_test=Fal
     return dataset
 
 # sinh.luutruong start
-def gen_submit(probs, preds, test_prefix, args):
+def gen_submit(checkpoint_dir, logits, probs, preds, test_prefix, args, pids_file_name="test_pids"):
     import pandas as pd
 
     n = probs.shape[0]
@@ -388,28 +392,99 @@ def gen_submit(probs, preds, test_prefix, args):
         "pred": [],
         "0_logit": [],
         "1_logit": [],
+        "0_prob": [],
+        "1_prob": [],
     }
 
-    file_pids = os.path.join(args.data_dir, "test_pids.txt")
-    file_submit = os.path.join(args.output_dir, "{}_submit.csv".format(test_prefix))
-    file_details = os.path.join(args.output_dir, "{}_details.csv".format(test_prefix))
+    file_pids = os.path.join(args.data_dir, "{}.txt".format(pids_file_name))
+    file_submit = os.path.join(checkpoint_dir, "{}_submit.csv".format(test_prefix))
+    file_details = os.path.join(checkpoint_dir, "{}_details.csv".format(test_prefix))
 
     with open(file_pids, "r") as f:
         lines = f.read().split('\n')
 
     for i in range(n):
         if not preds[i]: # ATTENTION: 0 means entailment, 1 otherwise
-            parts = lines[i].split('-')
+            parts = lines[i].split('@')
             submit_dict["test_id"].append(parts[0])
             submit_dict["answer"].append(parts[1])
 
         test_details_dict["id"].append(lines[i])
         test_details_dict["pred"].append(preds[i])
-        test_details_dict["0_logit"].append(probs[i][0])
-        test_details_dict["1_logit"].append(probs[i][1])
+        test_details_dict["0_logit"].append(logits[i][0])
+        test_details_dict["1_logit"].append(logits[i][1])
+        test_details_dict["0_prob"].append(probs[i][0])
+        test_details_dict["1_prob"].append(probs[i][1])
 
     pd.DataFrame(submit_dict).to_csv(file_submit, index=False, columns=["test_id", "answer"])
     pd.DataFrame(test_details_dict).to_csv(file_details, index=False, header=True)
+
+def gen_dev_details(
+    checkpoint_dir,
+    logits,
+    probs,
+    preds,
+    true_labels,
+    test_prefix,
+    args,
+    pids_file_name="dev_pids"
+):
+    from sklearn.metrics import classification_report, confusion_matrix
+    import io
+    import json
+
+    n = probs.shape[0]
+    test_details_dict = {
+        "id": [],
+        "pred": [],
+        "true": [],
+        "0_prob": [],
+        "1_prob": [],
+        "correct": [],
+        "0_logit": [],
+        "1_logit": [],
+        "pred_str": [],
+        "true_str": [],
+    }
+
+    file_pids = os.path.join(args.data_dir, "{}.txt".format(pids_file_name))
+    file_details = os.path.join(checkpoint_dir, "{}_details.csv".format(test_prefix))
+    file_report = os.path.join(checkpoint_dir, "{}_report.json".format(test_prefix))
+    file_confusion = os.path.join(checkpoint_dir, "{}_confusion.csv".format(test_prefix))
+
+    with open(file_pids, "r") as f:
+        lines = f.read().split('\n')
+
+    for i in range(n):
+        test_details_dict["id"].append(lines[i].split('@')[0])
+        test_details_dict["pred"].append(preds[i])
+        test_details_dict["true"].append(true_labels[i])
+        test_details_dict["correct"].append(1 if preds[i] == true_labels[i] else 0)
+        test_details_dict["0_prob"].append(probs[i][0])
+        test_details_dict["1_prob"].append(probs[i][1])
+        test_details_dict["0_logit"].append(logits[i][0])
+        test_details_dict["1_logit"].append(logits[i][1])
+        test_details_dict["pred_str"].append("no_answer" if preds[i] else "has_answer")
+        test_details_dict["true_str"].append("no_answer" if true_labels[i] else "has_answer")
+
+    # confusion matrix
+    df_confusion = pd.crosstab(true_labels, preds, rownames=['Actual'], colnames=['Predicted'], margins=True)
+    # classification_report
+    target_names = ["has_answer", "no_answer"]
+    report = classification_report(true_labels, preds, target_names=target_names, output_dict=True)
+
+    print (report)
+    print (df_confusion)
+
+    pd.DataFrame(test_details_dict).to_csv(file_details, index=False, header=True)
+    df_confusion.to_csv(file_confusion, index=True, header=True)
+    with io.open(file_report, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=4)
+
+    print ("Write file {}".format(file_details))
+    print ("Write file {}".format(file_confusion))
+    print ("Write file {}".format(file_report))
+
 # sinh.luutruong end
 
 def main():
@@ -431,12 +506,20 @@ def main():
     # sinh.luutruong added for test set START
     parser.add_argument("--do_test", action='store_true',
                         help="Whether to evaluate the test set.")
+    parser.add_argument("--do_private", action='store_true',
+                        help="Whether to evaluate the private set.")
     parser.add_argument("--train_file_name", default="train", type=str,
                         help="The train file name.")
     parser.add_argument("--dev_file_name", default="dev", type=str,
                         help="The dev evaluation file name.")
+    parser.add_argument("--dev_pids_file_name", default="dev_pids", type=str,
+                        help="The pids file name.")
     parser.add_argument("--test_file_name", default="test", type=str,
                         help="The test file name.")
+    parser.add_argument("--test_pids_file_name", default="test_pids", type=str,
+                        help="The pids file name.")
+    parser.add_argument("--from_tf", action="store_true",
+                        help="Whether from tf model")
     # sinh.luutruong added for test set END
     parser.add_argument("--config_name", default="", type=str,
                         help="Pretrained config name or path if not the same as model_name")
@@ -629,26 +712,53 @@ def main():
         for checkpoint in checkpoints:
             global_step = checkpoint.split('-')[-1] if len(checkpoints) > 1 else ""
             prefix = checkpoint.split('/')[-1] if checkpoint.find('checkpoint') != -1 else ""
-            model = model_class.from_pretrained(checkpoint)
+            model = model_class.from_pretrained(checkpoint, from_tf=args.from_tf)
             model.to(args.device)
             # sinh.luutruong start
             if args.do_eval:
                 result = evaluate(args, model, tokenizer, prefix=prefix, eval_test=False) # sinh.luutruong added eval_test
+
+                preds = result["preds"]
+                logits = result["logits"]
+                probs = result["probs"]
+                true_labels = result["true_labels"]
+                dev_prefix = '{}_{}_{}_{}_{}_{}'.format(
+                                    args.dev_file_name,
+                                    list(filter(None, args.model_name_or_path.split('/'))).pop(),
+                                    str(args.max_seq_length),
+                                    str(args.per_gpu_train_batch_size),
+                                    str(args.num_train_epochs),
+                                    str(args.task_name))
+                print ("dev_prefix: ", dev_prefix)
+                gen_dev_details(checkpoint, logits, probs, preds, true_labels, dev_prefix, args, args.dev_pids_file_name)
+
                 result = dict((k + '_{}'.format(global_step), v) for k, v in result.items())
                 results.update(result)
 
+            test_loop = []
             if args.do_test:
+                test_loop.append("test")
+            if args.do_private:
+                test_loop.append("private")
+
+            for test_type in test_loop:
+                if test_type == "private":
+                    args.test_file_name = "private"
+                    args.test_pids_file_name = "private_pids"
+
                 result = evaluate(args, model, tokenizer, prefix="{}_test".format(prefix), eval_test=True)
-                probs = result["probs"]
                 preds = result["preds"]
-                test_prefix = '{}_{}_{}_{}_{}'.format(
+                logits = result["logits"]
+                probs = result["probs"]
+                test_prefix = '{}_{}_{}_{}_{}_{}'.format(
                                     args.test_file_name,
-                                    prefix,
                                     list(filter(None, args.model_name_or_path.split('/'))).pop(),
                                     str(args.max_seq_length),
+                                    str(args.per_gpu_train_batch_size),
+                                    str(args.num_train_epochs),
                                     str(args.task_name))
                 print ("test_prefix: ", test_prefix)
-                gen_submit(probs, preds, test_prefix, args)
+                gen_submit(checkpoint, logits, probs, preds, test_prefix, args, args.test_pids_file_name)
             # sinh.luutruong end
 
     return results

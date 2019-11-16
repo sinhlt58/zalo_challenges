@@ -26,8 +26,15 @@ def _pre_process_sentence(text):
 def _write_tsv(df, tsv_file):
     df.to_csv(tsv_file, encoding="utf-8", quoting=csv.QUOTE_NONE, sep="\t", index=False,
                 columns=["index", "question", "sentence", "label"])
+    print ("Write file {}".format(tsv_file))
 
-def _zalo_to_glue(file_name, split_ratio=0.2):
+def _write_pids(id_pids, lang, dataset_type):
+    pids_file = "qna_data/glue_data/{}/{}_pids.txt".format(lang, dataset_type)
+    with open(pids_file, "w") as f:
+        for pid in id_pids:
+            f.write("{}\n".format(pid))
+
+def _zalo_to_glue(file_name, split_ratio=0.2, pre_method="normal_cased"):
     parts = file_name.split("_")
     lang = parts[0]
     dataset_type = parts[1]
@@ -41,21 +48,24 @@ def _zalo_to_glue(file_name, split_ratio=0.2):
         "question": [],
         "sentence": [],
         "label": [],
+        "pid": [],
     }
     id_pids = []
 
     for idx, json_sample in enumerate(json_samples):
         glue_dict["index"].append(idx)
         glue_dict["question"].append(
-            _pre_process_question(json_sample["question"])
+            _pre_process_question(json_sample["{}_question".format(pre_method)])
         )
         glue_dict["sentence"].append(
-            _pre_process_sentence(json_sample["text"])
+            _pre_process_sentence(json_sample["{}_text".format(pre_method)])
         )
         glue_dict["label"].append(
             "entailment" if json_sample["label"] else "not_entailment"
         )
-        id_pids.append("{}-{}".format(json_sample["id"], json_sample["pid"]))
+        id_pid = "{}@{}".format(json_sample["id"], json_sample["pid"])
+        id_pids.append(id_pid)
+        glue_dict["pid"].append(id_pid)
 
     glue_df = pd.DataFrame(glue_dict)
 
@@ -63,17 +73,16 @@ def _zalo_to_glue(file_name, split_ratio=0.2):
         glue_df, dev_df = train_test_split(glue_df, test_size=split_ratio, random_state=99)
         dev_tsv_file = "qna_data/glue_data/{}/{}.tsv".format(lang, "dev")
         _write_tsv(dev_df, dev_tsv_file)
+        _write_pids(dev_df["pid"], lang, "dev")
+
 
     if "test" in file_name or "private" in file_name:
-        pids_file = "qna_data/glue_data/{}/{}_pids.txt".format(lang, dataset_type)
-        with open(pids_file, "w") as f:
-            for pid in id_pids:
-                f.write("{}\n".format(pid))
+        _write_pids(id_pids, lang, dataset_type)
 
     _write_tsv(glue_df, tsv_file)
 
 def convert_zalo_to_glue():
-    file_names = ["en_train", "en_test", "vi_train", "vi_test"]
+    file_names = ["vi_train", "vi_test", "vi_private"]
 
     for file_name in file_names:
         _zalo_to_glue(file_name)
@@ -144,20 +153,41 @@ def _concat_tsv_files(file_names, merged_file):
     combined_df = pd.concat(dfs)
 
     _write_tsv(combined_df, merged_file)
+    print ("Write file {}".format(merged_file))
 
-def concat_tsv_files():
-    folder = "qna_data/glue_data/en"
-    train = "{}/train.tsv".format(folder)
-    dev = "{}/dev.tsv".format(folder)
-    squad_train = "{}/squad_train.tsv".format(folder)
+def concat_tsv_files(lang):
+    if lang == "en":
+        folder = "qna_data/glue_data/en"
+        train = "{}/train.tsv".format(folder)
+        dev = "{}/dev.tsv".format(folder)
+        squad_train = "{}/squad_train.tsv".format(folder)
 
-    zalo_full_train = "{}/zalo_full_train.tsv".format(folder)
-    squad_zalo_train = "{}/squad_zalo_train.tsv".format(folder)
-    squad_zalo_full_train = "{}/squad_zalo_full_train.tsv".format(folder)
+        zalo_full_train = "{}/zalo_full_train.tsv".format(folder)
+        squad_zalo_train = "{}/squad_zalo_train.tsv".format(folder)
+        squad_zalo_full_train = "{}/squad_zalo_full_train.tsv".format(folder)
 
-    _concat_tsv_files([train, dev], zalo_full_train)
-    _concat_tsv_files([train, squad_train], squad_zalo_train)
-    _concat_tsv_files([squad_train, zalo_full_train], squad_zalo_full_train)
+        _concat_tsv_files([train, dev], zalo_full_train)
+        _concat_tsv_files([train, squad_train], squad_zalo_train)
+        _concat_tsv_files([squad_train, zalo_full_train], squad_zalo_full_train)
+    elif lang == "vi":
+        folder = "qna_data/glue_data/vi"
+        train = "{}/train.tsv".format(folder)
+        dev = "{}/dev.tsv".format(folder)
+
+        zalo_full_train = "{}/zalo_full_train.tsv".format(folder)
+        _concat_tsv_files([train, dev], zalo_full_train)
+
+        # concat with trainslated qnli data from english
+        qnli_folder = "glue_data/qnli"
+        qnli_vi_train = "{}/vi_train.tsv".format(qnli_folder)
+        train_train_qnli = "{}/train_train_qnli.tsv".format(folder)
+        _concat_tsv_files([train, qnli_vi_train], train_train_qnli)
+
+        # concat with qna vietnamese data
+        qnavi_train = "squad_data/vi_train.tsv"
+        qnavi_dev = "squad_data/vi_dev.tsv"
+        train_qnavi_full = "{}/train_qnavi_full.tsv".format(folder)
+        _concat_tsv_files([train, qnavi_train, qnavi_dev], train_qnavi_full)
 
 if __name__ == "__main__":
     data_task_type = sys.argv[1]
@@ -167,4 +197,4 @@ if __name__ == "__main__":
     elif data_task_type == "squad":
         convert_squad_to_glue()
     elif data_task_type == "concat":
-        concat_tsv_files()
+        concat_tsv_files(lang="vi")

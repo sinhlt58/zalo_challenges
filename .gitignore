@@ -12,3 +12,5 @@ runs
 transformers-repo
 squad_data
 squad
+bert-vietnamese-question-answering
+bert

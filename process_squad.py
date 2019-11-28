@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import csv
 
-from utils import read_json_data
+from utils import read_json_data, write_json_data
 
 def _write_tsv(df, tsv_file):
     df.to_csv(tsv_file, encoding="utf-8", quoting=csv.QUOTE_NONE, sep="\t", index=False,
@@ -41,6 +41,31 @@ def _vi_to_qnli(dataset, lang="vi"):
     _write_tsv(df, tsv_path)
     print ("Write file {}".format(tsv_path))
 
+def _vi_to_zalo():
+    squad_dir = "squad_data"
+    zalo_samples = []
+    _id = 0
+    for file_name in ["vi_train-v2.0.json", "vi_dev-v2.0.json"]:
+        file_path = "{}/{}".format(squad_dir, file_name)
+        samples = read_json_data(file_path)
+        for sample in samples["data"]:
+            title = sample["title"]
+            for p in sample["paragraphs"]:
+                context = p["context"]
+                for qa in p["qas"]:
+                    zalo_sample = {
+                        "id": "squad-{}".format(_id),
+                        "title": title,
+                        "question": qa["question"],
+                        "text": context,
+                        "label": not qa["is_impossible"],
+                    }
+                    zalo_samples.append(zalo_sample)
+                    _id += 1
+
+    out_path = "qna_data/squad.json"
+    write_json_data(out_path, zalo_samples)
+    print ("Write file {}".format(out_path))
 
 if __name__ == "__main__":
     arg1 = sys.argv[1]
@@ -48,5 +73,7 @@ if __name__ == "__main__":
     if arg1 == "vi_to_qnli":
         _vi_to_qnli("train")
         _vi_to_qnli("dev")
+    elif arg1 == "vi_to_zalo":
+        _vi_to_zalo()
     else:
         pass

@@ -387,7 +387,9 @@ if __name__ == "__main__":
     configs = [
         {
             "language": "vi",
-            "dataset_types": ["train", "test", "private"],
+            "dataset_types": ["train", "test", "private", "squad", "btrain", "bsquad"],
+            # "dataset_types": ["squad"],
+            # "dataset_types": ["ltest"],
             "methods": ["normal"],
             "cases": ["cased"],
             "local_test_split": 0.2,

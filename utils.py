@@ -26,6 +26,9 @@ def create_folder(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
+def get_dir_names(path):
+    return next(os.walk(path))[1]
+
 bert_models_map = {
     "caseds": "cased_L-12_H-768_A-12",
     "casedl": "cased_L-24_H-1024_A-16",

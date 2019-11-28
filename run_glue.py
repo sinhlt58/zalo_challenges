@@ -158,9 +158,12 @@ def train(args, train_dataset, model, tokenizer):
         for step, batch in enumerate(epoch_iterator):
             model.train()
             batch = tuple(t.to(args.device) for t in batch)
+            class_weight = torch.FloatTensor([1.5776614310645725, 0.7319838056680162]) # sinh added
+            class_weight = class_weight.to(args.device)
             inputs = {'input_ids':      batch[0],
                       'attention_mask': batch[1],
-                      'labels':         batch[3]}
+                      'labels':         batch[3],
+                      'class_weight': class_weight,}
             if args.model_type != 'distilbert':
                 inputs['token_type_ids'] = batch[2] if args.model_type in ['bert', 'xlnet'] else None  # XLM, DistilBERT and RoBERTa don't use segment_ids
             outputs = model(**inputs)

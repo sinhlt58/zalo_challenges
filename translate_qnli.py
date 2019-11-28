@@ -7,27 +7,27 @@ from textblob import TextBlob
 from textblob.exceptions import NotTranslated
 
 def translate(args, file_name):
-    en_file = os.path.join(args.in_dir, file_name)
-    vi_file = os.path.join(args.out_dir, file_name)
+    src_file = os.path.join(args.in_dir, file_name)
+    trg_file = os.path.join(args.out_dir, file_name)
 
-    if not os.path.exists(vi_file):
-        print ("Create file {}".format(vi_file))
-        open(vi_file, 'a', encoding="utf-8").close()
+    if not os.path.exists(trg_file):
+        print ("Create file {}".format(trg_file))
+        open(trg_file, 'a', encoding="utf-8").close()
 
-    current_line = sum(1 for line in open(vi_file, "r", encoding="utf-8"))
+    current_line = sum(1 for line in open(trg_file, "r", encoding="utf-8"))
     print ("{}. current_line: {}".format(file_name, current_line))
 
-    lines = [l.strip() for l in open(en_file, "r", encoding="utf-8")]
+    lines = [l.strip() for l in open(src_file, "r", encoding="utf-8")]
 
     if current_line == len(lines):
         print ("File {} already translated all sentences!".format(file_name))
         return
 
-    with open(vi_file, "a", encoding="utf-8") as f:
+    with open(trg_file, "a", encoding="utf-8") as f:
         for idx in range(current_line, len(lines)):
             source_line = lines[idx]
             try:
-                target_line = str(TextBlob(source_line).translate("en", "vi"))
+                target_line = str(TextBlob(source_line).translate(args.src, args.trg))
                 f.write("{}\n".format(target_line))
             except NotTranslated:
                 print ("{}. Line {}. Unchange after translate so write the source line".format(
@@ -44,6 +44,8 @@ if __name__ == "__main__":
     parser.add_argument("--do_remote", action="store_true")
     parser.add_argument("--in_dir", default="glue_data/qnli/en", type=str, required=False)
     parser.add_argument("--out_dir", default="glue_data/qnli/vi", type=str, required=False)
+    parser.add_argument("--src", default="en", type=str, required=False)
+    parser.add_argument("--trg", default="vi", type=str, required=False)
 
     args = parser.parse_args()
 

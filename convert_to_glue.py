@@ -5,7 +5,7 @@ import sys
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import read_json_data
+from utils import read_json_data, create_folder
 
 def _pre_process_common(text):
     text = text.replace("\\t", " ")
@@ -28,18 +28,120 @@ def _write_tsv(df, tsv_file):
                 columns=["index", "question", "sentence", "label"])
     print ("Write file {}".format(tsv_file))
 
-def _write_pids(id_pids, lang, dataset_type):
-    pids_file = "qna_data/glue_data/{}/{}_pids.txt".format(lang, dataset_type)
+def _write_pids(id_pids, lang, dataset_type, pids_file=None):
+    if pids_file is None:
+        pids_file = "qna_data/glue_data/{}/final/{}_pids.txt".format(lang, dataset_type)
     with open(pids_file, "w") as f:
         for pid in id_pids:
             f.write("{}\n".format(pid))
+    print ("Write file {}".format(pids_file))
 
-def _zalo_to_glue(file_name, split_ratio=0.2, pre_method="normal_cased"):
+def _count_word(txt):
+    return len(txt.split())
+
+def _summary_df(df):
+    total = int(df.shape[0])
+    num_has_answer = int((df["label"] == "entailment").sum())
+    num_no_answer = total - num_has_answer
+    print("total", total)
+    print("num_has_answer", num_has_answer)
+    print("num_no_answer", num_no_answer)
+    print("percentage_has_answer", num_has_answer / total)
+    print("percentage_no_answer", num_no_answer / total)
+    print("has_answer_ratio", num_has_answer / num_no_answer)
+
+
+def _split_k_folds(df, lang, num_folds=5, batch_size=32, max_len=512):
+    from sklearn.utils import shuffle
+    from sklearn.model_selection import KFold
+
+    n = df.shape[0]
+    # we remove number of batch_remainder longest sequences
+    examples_remain = n % batch_size
+    num_batch = n // batch_size
+
+    # remain batch fold
+    num_batch_remain = num_batch % num_folds
+
+    # 1. Remove examples_remain longest examples
+    q_s_lengths = []
+    for i, row in df.iterrows():
+        len_q = _count_word(row["question"])
+        len_s = _count_word(row["sentence"])
+        q_s_lengths.append(len_q + len_s)
+    df["q_s_len"] = q_s_lengths
+    df = df.sort_values(by=["q_s_len"], ascending=False)
+    df_to_remove = df.iloc[:examples_remain]
+    df = df[examples_remain:]
+
+    train_full_path = "qna_data/glue_data/{}/cv/train_zalo_full.tsv".format(lang)
+    df = df.sort_values(by=["q_s_len"])
+    _write_tsv(df, train_full_path)
+
+    # 2. K folds split
+    # add add remain examples to the train folds
+    num_batch_remain_example = num_batch_remain * batch_size
+    df = shuffle(df, random_state=16)
+    # reset index
+    df.reset_index(inplace=True, drop=True)
+    del df["q_s_len"]
+
+    # add later df
+    add_later_df = df[:num_batch_remain_example]
+    df = df[num_batch_remain_example:]
+
+    print ("num examples: ", n)
+    print ("batch size: ", batch_size)
+    print ("remove examples: ", examples_remain)
+    print ("num batch size: ", num_batch)
+    print ("num folds: ", num_folds)
+    print ("num batch remain: ", num_batch_remain)
+    print ("num batch remain example: ", num_batch_remain_example)
+    kf = KFold(n_splits=num_folds)
+    fold_i = 0
+    for train_index, dev_index in kf.split(df):
+        train_df = df.loc[train_index, :]
+        dev_df = df.loc[dev_index, :]
+
+        train_df = pd.concat([train_df, add_later_df])
+
+        print ("********************** Summary fold {} **********************".format(fold_i))
+        print ("-----Summary train_df-----")
+        _summary_df(train_df)
+        print ("-----Summary dev_df-----")
+        _summary_df(dev_df)
+
+        fold_folder = "qna_data/glue_data/{}/cv/fold{}".format(lang, fold_i)
+        create_folder(fold_folder)
+
+        train_df_path = "{}/train.tsv".format(fold_folder)
+        dev_df_path = "{}/dev.tsv".format(fold_folder)
+        dev_pids_path = "{}/dev_pids.txt".format(fold_folder)
+
+        _write_tsv(train_df, train_df_path)
+        _write_tsv(dev_df, dev_df_path)
+        _write_pids(dev_df["pid"], lang, "dev", dev_pids_path)
+
+        fold_i += 1
+
+
+def _split_train(in_dir, df, train_out, dev_out):
+    train_df, dev_df = train_test_split(df, test_size=0.18, random_state=100)
+
+    train_out_path = "{}/{}.tsv".format(in_dir, train_out)
+    dev_out_path = "{}/{}.tsv".format(in_dir, dev_out)
+
+    _write_tsv(train_df, train_out_path)
+    _write_tsv(dev_df, dev_out_path)
+    _write_pids(dev_df["index"], "vi", dev_out)
+
+
+def _zalo_to_glue(file_name, pre_method="normal_cased"):
     parts = file_name.split("_")
     lang = parts[0]
     dataset_type = parts[1]
     json_file = "qna_data/{}.json".format(file_name)
-    tsv_file = "qna_data/glue_data/{}/{}.tsv".format(lang, dataset_type)
+    tsv_file = "qna_data/glue_data/{}/final/{}.tsv".format(lang, dataset_type)
 
     json_samples = read_json_data(json_file)
 
@@ -69,11 +171,14 @@ def _zalo_to_glue(file_name, split_ratio=0.2, pre_method="normal_cased"):
 
     glue_df = pd.DataFrame(glue_dict)
 
-    if "train" in file_name:
-        glue_df, dev_df = train_test_split(glue_df, test_size=split_ratio, random_state=99)
-        dev_tsv_file = "qna_data/glue_data/{}/{}.tsv".format(lang, "dev")
-        _write_tsv(dev_df, dev_tsv_file)
-        _write_pids(dev_df["pid"], lang, "dev")
+    if file_name == "vi_train":
+        _split_train("qna_data/glue_data/vi/final", glue_df, "train90", "dev10")
+
+    if file_name == "vi_btrain":
+        _split_train("qna_data/glue_data/vi/final", glue_df, "btrain90", "bdev10")
+
+    # divide in into k folds here
+    # _split_k_folds(glue_df, lang)
 
 
     if "test" in file_name or "private" in file_name:
@@ -81,8 +186,13 @@ def _zalo_to_glue(file_name, split_ratio=0.2, pre_method="normal_cased"):
 
     _write_tsv(glue_df, tsv_file)
 
+
 def convert_zalo_to_glue():
-    file_names = ["vi_train", "vi_test", "vi_private"]
+    file_names = ["vi_train", "vi_test", "vi_private", "vi_squad", "vi_btrain", "vi_bsquad", "vi_ltest"]
+    # file_names = ["vi_train"]
+    # file_names = ["vi_test"]
+    # file_names = ["vi_squad"]
+    # file_names = ["vi_ltest"]
 
     for file_name in file_names:
         _zalo_to_glue(file_name)
@@ -153,48 +263,42 @@ def _concat_tsv_files(file_names, merged_file):
     combined_df = pd.concat(dfs)
 
     _write_tsv(combined_df, merged_file)
-    print ("Write file {}".format(merged_file))
 
-def concat_tsv_files(lang):
-    if lang == "en":
-        folder = "qna_data/glue_data/en"
-        train = "{}/train.tsv".format(folder)
-        dev = "{}/dev.tsv".format(folder)
-        squad_train = "{}/squad_train.tsv".format(folder)
+def concat_tsv_files(in_dir, in_filenames, out_filename):
+    paths = []
+    for fn in in_filenames:
+        paths.append("{}/{}.tsv".format(in_dir, fn))
 
-        zalo_full_train = "{}/zalo_full_train.tsv".format(folder)
-        squad_zalo_train = "{}/squad_zalo_train.tsv".format(folder)
-        squad_zalo_full_train = "{}/squad_zalo_full_train.tsv".format(folder)
+    out_path = "{}/{}.tsv".format(in_dir, out_filename)
+    _concat_tsv_files(paths, out_path)
 
-        _concat_tsv_files([train, dev], zalo_full_train)
-        _concat_tsv_files([train, squad_train], squad_zalo_train)
-        _concat_tsv_files([squad_train, zalo_full_train], squad_zalo_full_train)
-    elif lang == "vi":
-        folder = "qna_data/glue_data/vi"
-        train = "{}/train.tsv".format(folder)
-        dev = "{}/dev.tsv".format(folder)
 
-        zalo_full_train = "{}/zalo_full_train.tsv".format(folder)
-        _concat_tsv_files([train, dev], zalo_full_train)
+def replace_question(in_dir, from_f, to_f):
+    from_path = "{}/{}.tsv".format(in_dir, from_f)
+    to_path = "{}/{}.tsv".format(in_dir, to_f)
 
-        # concat with trainslated qnli data from english
-        qnli_folder = "glue_data/qnli"
-        qnli_vi_train = "{}/vi_train.tsv".format(qnli_folder)
-        train_train_qnli = "{}/train_train_qnli.tsv".format(folder)
-        _concat_tsv_files([train, qnli_vi_train], train_train_qnli)
+    from_df = pd.read_csv(from_path, encoding="utf-8", sep="\t", quoting=csv.QUOTE_NONE)
+    to_df = pd.read_csv(to_path, encoding="utf-8", sep="\t", quoting=csv.QUOTE_NONE)
 
-        # concat with qna vietnamese data
-        qnavi_train = "squad_data/vi_train.tsv"
-        qnavi_dev = "squad_data/vi_dev.tsv"
-        train_qnavi_full = "{}/train_qnavi_full.tsv".format(folder)
-        _concat_tsv_files([train, qnavi_train, qnavi_dev], train_qnavi_full)
+    to_df["question"] = from_df["question"]
+
+    _write_tsv(to_df, to_path)
 
 if __name__ == "__main__":
     data_task_type = sys.argv[1]
+    in_dir = "qna_data/glue_data/vi/final"
 
     if data_task_type == "zalo":
         convert_zalo_to_glue()
     elif data_task_type == "squad":
         convert_squad_to_glue()
     elif data_task_type == "concat":
-        concat_tsv_files(lang="vi")
+        # concat_tsv_files(in_dir, ["train90", "squad"], "train90_squad")
+        # concat_tsv_files(in_dir, ["train90", "squad", "btrain90", "bsquad"], "btrain90_squad")
+        # concat_tsv_files(in_dir, ["train", "squad", "btrain", "bsquad"], "btrain100_squad")
+        concat_tsv_files(in_dir, ["train", "squad"], "train100_squad")
+    elif data_task_type == "replace_question":
+        replace_question(in_dir, "train", "btrain")
+        replace_question(in_dir, "train90", "btrain90")
+        replace_question(in_dir, "dev10", "bdev10")
+        replace_question(in_dir, "squad", "bsquad")

@@ -10,7 +10,7 @@ from transformers import (
     XLMTokenizer,
     glue_convert_examples_to_features,
 )
-from utils import write_json_data, read_json_data, find_dict_data, process_split_text
+from utils import write_json_data, read_json_data, find_dict_data, process_split_text, get_dir_names
 
 
 def _int64_feature(values):
@@ -239,10 +239,12 @@ if __name__ == "__main__":
     arg1 = sys.argv[1]
 
     if arg1 == "to_tf_record":
-        # _to_tf_record("qna_data/glue_data/vi", "bert", "bert-base-multilingual-cased", 512)
-        _to_tf_record("qna_data/glue_data/vi", "bert", "bert-base-multilingual-cased", 512, include=["train", "dev", "test"])
-        # _to_tf_record("qna_data/glue_data/vi", "xlm", "xlm-mlm-17-1280", 256)
-        # _to_tf_record("qna_data/glue_data/vi", "xlm", "xlm-mlm-17-1280", 128)
+        in_dir = "qna_data/glue_data/vi/final"
+        # _to_tf_record(in_dir, "bert", "bert-base-multilingual-cased", 512, include=["btrain100_squad"])
+        _to_tf_record(in_dir, "bert", "bert-base-multilingual-cased", 512, include=["train100_squad"])
+        # _to_tf_record(in_dir, "bert", "bert-base-multilingual-cased", 512, include=["train90_squad", "btrain90_squad", "dev10", "test", "ltest"])
+
+
     elif arg1 == "test_read_tf_record":
         _test_read_tf_record()
     elif arg1 == "summary":

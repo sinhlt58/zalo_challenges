@@ -52,19 +52,23 @@ def convert_data(dataset_type, include_txt=True):
     for sample_json in data_json:
         converted_sample = None
 
-        if dataset_type == "train":
+        if dataset_type in ["train", "squad"]:
             converted_sample = sample_json
             converted_sample["pid"] = "p1"
             converted_samples.append(converted_sample)
 
-        elif dataset_type in ["test", "private"]:
+        elif dataset_type in ["test", "private", "ltest"]:
             for p in sample_json["paragraphs"]:
+                if 'label' in p:
+                    label = True if p['label'] == '1' else False
+                else:
+                    label = False
                 converted_sample = {
                     "id": sample_json["__id__"],
                     "title": sample_json["title"],
                     "question": sample_json["question"],
                     "text": p["text"],
-                    "label": False,
+                    "label": label,
                     "pid": p["id"]
                 }
                 converted_samples.append(converted_sample)
@@ -78,11 +82,11 @@ def convert_data(dataset_type, include_txt=True):
     print ("Done write raw files for translation")
 
 def convert_raw_en_to_json(dataset_type):
-    raw_id_type_file = "qna_data/raw_id_type_{}.txt".format(dataset_type)
-    raw_en_file = "qna_data/raw_en_{}.txt".format(dataset_type)
-    en_file = "qna_data/en_{}.json".format(dataset_type)
+    raw_id_type_file = "qna_data/back_tran/raw_id_type_{}.txt".format(dataset_type)
+    raw_en_file = "qna_data/back_tran/raw_vi_{}.txt".format(dataset_type)
+    en_file = "qna_data/vi_{}.json".format(dataset_type)
     # for getting the title only
-    vi_json_file = "qna_data/vi_{}.json".format(dataset_type)
+    vi_json_file = "qna_data/vi_{}.json".format(dataset_type[1:])
     vi_json_samples = read_json_data(vi_json_file)
 
     en_json_samples = []
@@ -123,7 +127,7 @@ if __name__ == "__main__":
         back = sys.argv[2]
 
     if dataset_type == "all":
-        dataset_types = ["train", "test"]
+        dataset_types = ["train", "test", "btrain", "bsquad"]
     else:
         dataset_types = [dataset_type]
 
